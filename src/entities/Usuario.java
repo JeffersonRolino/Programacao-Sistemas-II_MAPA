@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public abstract class Usuario {
     String nome;
-    int cpf;
+    String cpf;
     LocalDate[] datasDeVacinacao = new LocalDate[4];
 
     //Construtores
@@ -16,7 +16,7 @@ public abstract class Usuario {
         this.nome = nome;
     }
 
-    public Usuario(String nome, int cpf) {
+    public Usuario(String nome, String cpf) {
         this.nome = nome;
         this.cpf = cpf;
     }
@@ -30,11 +30,11 @@ public abstract class Usuario {
         this.nome = nome;
     }
 
-    public int getCpf() {
+    public String getCpf() {
         return cpf;
     }
 
-    public void setCpf(int cpf) {
+    public void setCpf(String cpf) {
         this.cpf = cpf;
     }
 

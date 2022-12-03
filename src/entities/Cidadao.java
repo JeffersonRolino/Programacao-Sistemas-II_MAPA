@@ -6,7 +6,7 @@ public class Cidadao extends Usuario {
     }
 
     //Construtor
-    public Cidadao(String nome, int cpf) {
+    public Cidadao(String nome, String cpf) {
         super(nome, cpf);
     }
 }

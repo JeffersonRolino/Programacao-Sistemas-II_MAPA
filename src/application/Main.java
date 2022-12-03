@@ -3,7 +3,9 @@ import entities.Cidadao;
 import entities.Usuario;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -56,7 +58,7 @@ public class Main {
     }
 
     public static void vacinarCidadao(Scanner scanner, ArrayList<Usuario> usuarios) {
-        int cpf = 0;
+        String cpf = null;
         String nome = null;
         LocalDate[] datas = new LocalDate[4];
 
@@ -65,10 +67,9 @@ public class Main {
         DateTimeFormatter formatadorDeDatas = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         System.out.println("Informe o CPF do Cidadão: ");
-        if(scanner.hasNextInt()) {
-            cpf = scanner.nextInt();
+        if(scanner.hasNextLine()) {
+            cpf = scanner.nextLine();
             cidadao.setCpf(cpf);
-            scanner.nextLine(); //Limpando Scanner
         }
         else {
             System.out.println("\n\tValor inválido...");
@@ -88,11 +89,22 @@ public class Main {
         for (int i = 0; i < datas.length; i++){
             LocalDate data;
             String dataEntrada;
-            System.out.printf("Data da Vacina %d: ", i + 1);
+
+            System.out.printf("Informe a Data da %dª dose (dia/mes/ano): ", i + 1);
             if(scanner.hasNextLine()) {
                 dataEntrada = scanner.nextLine();
                 data = LocalDate.parse(dataEntrada, formatadorDeDatas);
                 datas[i] = data;
+                if(i > 0){
+                    int mesesDeDiferenca = Period.between(datas[i-1], data).getMonths();
+                    if(mesesDeDiferenca < 4){
+                        System.out.println(mesesDeDiferenca);
+                        System.out.println("Data Inválida:");
+                        System.out.println("\tO período entre as Doses deve ser no mínimo 4 meses");
+                        System.out.println("\tO Cidadão não foi registrado...");
+                        return;
+                    }
+                }
             }
             else {
                 System.out.println("\n\tValor inválido...");
@@ -103,7 +115,6 @@ public class Main {
             }
         }
         cidadao.setDatasDeVacinacao(datas);
-
 
         usuarios.add(cidadao);
 
@@ -160,18 +171,18 @@ public class Main {
     }
 
     public static void logar(Scanner scanner){
-        System.out.println("Olá, seja bem vindo ao Sistema de Vacinação.");
 
-        System.out.println("Informe seu CPF:");
-        String CPF;
+        System.out.println("Informe o CPF da Enfermeira:");
         if(scanner.hasNext()){
-            CPF = scanner.nextLine();
+            String CPF = scanner.nextLine();
         }
 
-        System.out.println("Informe seu nome:");
-        String nome;
+        System.out.println("Informe o Nome da Enfermeira:");
+        String nome = null;
         if(scanner.hasNext()) {
             nome = scanner.nextLine();
         }
+
+        System.out.printf("Olá %s, seja bem vindo(a) ao Sistema de Vacinação\n", nome);
     }
 }
