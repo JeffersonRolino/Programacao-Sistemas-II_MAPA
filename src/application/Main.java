@@ -1,29 +1,30 @@
 package application;
+
 import entities.Cidadao;
+import entities.Enfermeira;
 import entities.Usuario;
+import registers.Registro;
+import utils.Utils;
 
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Usuario> usuarios = new ArrayList<Usuario>();
+        ArrayList<Usuario> usuarios = new ArrayList<>();
+        Registro registro = new Registro();
 
 
         int option = 42;
 
-        logar(scanner);
+        logar(scanner, registro);
 
         while(option != 0) {
             System.out.println("--------------------------------------------------------");
             System.out.println("\t\t MENU");
             System.out.println("--------------------------------------------------------");
-            System.out.println("Escolha uma opção");
             System.out.println("1 - Vacinar Cidadão");
             System.out.println("2 - Listar Cidadãos");
             System.out.println("0 - Sair");
@@ -36,7 +37,7 @@ public class Main {
                     return;
                 }
                 else if(option == 1) {
-                    vacinarCidadao(scanner, usuarios);
+                    vacinarCidadao(scanner, usuarios, registro);
                 }
                 else if(option == 2) {
                     listarCidadaos(usuarios);
@@ -57,14 +58,12 @@ public class Main {
         scanner.close();
     }
 
-    public static void vacinarCidadao(Scanner scanner, ArrayList<Usuario> usuarios) {
-        String cpf = null;
-        String nome = null;
+    public static void vacinarCidadao(Scanner scanner, ArrayList<Usuario> usuarios, Registro registro) {
+        String cpf;
+        String nome;
         LocalDate[] datas = new LocalDate[4];
 
         Usuario cidadao = new Cidadao();
-
-        DateTimeFormatter formatadorDeDatas = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         System.out.println("Informe o CPF do Cidadão: ");
         if(scanner.hasNextLine()) {
@@ -93,18 +92,17 @@ public class Main {
             System.out.printf("Informe a Data da %dª dose (dia/mes/ano): ", i + 1);
             if(scanner.hasNextLine()) {
                 dataEntrada = scanner.nextLine();
-                data = LocalDate.parse(dataEntrada, formatadorDeDatas);
-                datas[i] = data;
+                data = Utils.converterData(dataEntrada);
                 if(i > 0){
-                    int mesesDeDiferenca = Period.between(datas[i-1], data).getMonths();
+                    long mesesDeDiferenca = Utils.getDiferencaEmMeses(datas[i-1], data);
                     if(mesesDeDiferenca < 4){
-                        System.out.println(mesesDeDiferenca);
-                        System.out.println("Data Inválida:");
-                        System.out.println("\tO período entre as Doses deve ser no mínimo 4 meses");
-                        System.out.println("\tO Cidadão não foi registrado...");
+                        System.out.println("\nData Inválida:");
+                        System.out.println("\tO período entre as Doses deve ser no mínimo 4 meses...");
+                        System.out.println("\tO Cidadão não foi registrado...\n");
                         return;
                     }
                 }
+                datas[i] = data;
             }
             else {
                 System.out.println("\n\tValor inválido...");
@@ -117,6 +115,7 @@ public class Main {
         cidadao.setDatasDeVacinacao(datas);
 
         usuarios.add(cidadao);
+        registro.adicionarCidadao(cidadao);
 
         System.out.println("\nCidadão cadastrado com sucesso: ");
         System.out.println("--------------------------------------------------------");
@@ -127,7 +126,7 @@ public class Main {
         System.out.println("1 - Sim");
         System.out.println("2 - Não");
 
-        int vacinar = 42;
+        int vacinar;
         if(scanner.hasNextInt()) {
             vacinar = scanner.nextInt();
             scanner.nextLine();
@@ -140,10 +139,10 @@ public class Main {
         }
 
         if(vacinar == 2) {
-            return;
+            System.out.println("\tRetornando ao Menu Principal...\n");
         }
         else if(vacinar == 1) {
-            vacinarCidadao(scanner, usuarios);
+            vacinarCidadao(scanner, usuarios, registro);
         }
         else {
             System.out.println("\nValor inválido...");
@@ -158,31 +157,34 @@ public class Main {
         if(usuarios.size() == 0) {
             System.out.println("\n\tAinda não há Cidadãos cadastrados...");
             System.out.println("\tRetornando ao Menu Principal...\n");
-            return;
         }
         else {
             System.out.println();
             System.out.println("\n--------------------------------------------------------");
-            System.out.println("\t\t Cidadãos");
+            System.out.println("\t\t Cidadãos Vacinados");
             System.out.println("--------------------------------------------------------");
 
             usuarios.forEach((usuario) -> System.out.println(usuario + "\n"));
         }
     }
 
-    public static void logar(Scanner scanner){
+    public static void logar(Scanner scanner, Registro registro){
+        String CPF = null;
+        String nome = null;
 
         System.out.println("Informe o CPF da Enfermeira:");
         if(scanner.hasNext()){
-            String CPF = scanner.nextLine();
+            CPF = scanner.nextLine();
         }
 
         System.out.println("Informe o Nome da Enfermeira:");
-        String nome = null;
         if(scanner.hasNext()) {
             nome = scanner.nextLine();
         }
 
-        System.out.printf("Olá %s, seja bem vindo(a) ao Sistema de Vacinação\n", nome);
+        Enfermeira enfermeira = new Enfermeira(nome, CPF);
+        registro.setEnfermeira(enfermeira);
+
+        System.out.printf("\nOlá %s, seja bem vindo(a) ao Sistema de Vacinação\n", nome);
     }
 }
